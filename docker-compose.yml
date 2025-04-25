@@ -1,0 +1,23 @@
+services:
+  redis-enterprise:
+    image: redislabs/redis:7.22.0-12
+    platform: linux/amd64
+    ports:
+      - "8443:8443"
+      - "9443:9443"
+      - "8070:8070"  # Prometheus metrics
+      - "12000-12099:12000-12099"
+    environment:
+      - accept_license=yes
+    # Remove the volume mount to let the container manage its own directories
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    restart: unless-stopped
+    depends_on:
+      - redis-enterprise
